@@ -1,0 +1,103 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.3.0                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+convertToMeters 1;
+
+vertices
+(
+    (0 0 0)// these are the 8 vertices for cube 1 (x y z)
+    (1 0 0)
+    (1 1 0)
+    (0 1 0)
+    (0 0 0.5)
+    (1 0 0.5)
+    (1 1 0.5)
+    (0 1 0.5)
+
+    (1 0 0)// this is cube two. Notice they share vertices.
+    (2 0 0)
+    (2 1 0)
+    (1 1 0)
+    (1 0 0.5)
+    (2 0 0.5)
+    (2 1 0.5)
+    (1 1 0.5)
+);
+    // This is were you define the cube. First bracket is important because the order matters. 
+    // Basically 2 entry defines x, 4th y and 5th z.
+    // This would be the set up for cubes but you can do other shapes but I don't know how atm.
+blocks
+(
+    hex (0 1 2 3 4 5 6 7) (64 32 16) simpleGrading (10 10 1)
+    hex (8 9 10 11 12 13 14 15) (64 32 16) simpleGrading (0.1 10 1)
+);
+
+    // This part sets up boundary conditions but not important yet, but eventually need to 
+    // specify what faces are against each other to set a continuous condition.
+edges
+(
+);
+
+boundary
+(
+    atmosphere
+    {
+        type patch;
+        faces
+        (
+            (3 7 6 2)
+            (11 15 14 10)
+        );
+    }
+    walls
+    {
+        type wall;
+        faces
+        (
+            (0 1 2 3)
+            (0 1 5 4)
+            (0 4 7 3)
+            (4 5 6 7)
+            (8 9 10 11)
+            (8 9 13 12)
+            (9 10 14 13)
+            (12 13 14 15)
+        );
+    }
+    patch1
+    {
+        type patch;
+        faces
+        (
+            (1 2 6 5)
+        );
+    }
+    patch2
+    {
+        type patch;
+        faces
+        (
+            (8 12 15 11)
+        );
+    }
+);
+
+mergePatchPairs
+(
+(patch1 patch2)
+);
+
+// ************************************************************************* //
