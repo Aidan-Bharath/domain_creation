@@ -2,7 +2,6 @@
 
 from __future__ import division
 import numpy as np
-import matplotlib.pyplot as plt
 
 class Wave:
 
@@ -38,6 +37,7 @@ class Wave:
         self.omega = (2*np.pi)/self.T
         Wave.O = self.k*self.x[:,None]-self.omega*self.time[None,:]
         Wave.S = 1/np.cosh(2*self.k*self.h)
+        self.test = None
 
     def FOpotential(self):
 
@@ -179,6 +179,7 @@ class Wave:
                 nSens += 1
 
         self.gauges = np.zeros([len(index),len(a)])
+        self.test = np.zeros([len(index),len(a)])
         self.simtime = [float(a[i]) for i in xrange(len(a))]
 
         if len(index) >= 10:
@@ -189,10 +190,16 @@ class Wave:
 
                 rfile = '/GaugeVOF0'+str(k+1)+'_alpha.water.xy'
                 ofile = np.loadtxt(pathname+self.runfile+postPath+str(j)+rfile)
-                argl = ofile[np.argwhere(ofile[:,3] <= 0.5),2].min()
-                argg = ofile[np.argwhere(ofile[:,3] >= 0.5),2].max()
-                vof = np.mean([argl,argg])
+
+                vof = ofile[0,2]
+                for s in range(len(ofile[:,2])-1):
+                    vof = vof + ofile[s,3]*(ofile[s+1,2]-ofile[s,2])
                 self.gauges[k,i] = vof
+
+
+
+
+
 
 
 
