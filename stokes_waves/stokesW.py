@@ -179,7 +179,7 @@ class Wave:
                 nSens += 1
 
         self.gauges = np.zeros([len(index),len(a)])
-        self.simtime = a
+        self.simtime = [float(a[i]) for i in xrange(len(a))]
 
         if len(index) >= 10:
             print '# of Gauges exceed 10, Check file naming'
