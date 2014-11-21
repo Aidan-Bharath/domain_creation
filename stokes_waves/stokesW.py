@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
@@ -6,6 +8,8 @@ class Wave:
 
     O = None
     g = 9.81
+    rho = 1000
+    vk = 1.004
     pot = False
     S = None
     firsto = None
@@ -13,11 +17,17 @@ class Wave:
     thirdo = None
     fourtho = None
     fiftho = None
+    potent = None
 
     def __init__(self,lm,x,T,time,A,h=None):
 
         self.eta = None
         self.I = None
+        self.yp = None
+        self.y = None
+        self.runfile = None
+        self.gauges = None
+        self.simtime = None
         self.time = np.linspace(0,time,time*60)
         self.x = np.array([x]).flatten()
         self.lm = lm
@@ -29,6 +39,33 @@ class Wave:
         Wave.O = self.k*self.x[:,None]-self.omega*self.time[None,:]
         Wave.S = 1/np.cosh(2*self.k*self.h)
 
+    def FOpotential(self):
+
+        self.firstOrder()
+
+        if Wave.potent == None:
+            w = (self.omega/self.k)
+            ch = np.cosh(self.k*(self.eta+self.h))
+            sh = np.sinh(self.k*self.h)
+            p = self.A*(ch/sh)*w
+            self.I = p*np.sin(Wave.O)
+
+            Wave.potent = self.I
+
+        else:
+
+            self.I = Wave.potent
+
+    def y_plus(self,yp = 2):
+        self.yp = yp
+
+        self.FOpotential()
+
+        gradI = np.abs(np.max(np.gradient(self.I[:,0])))/self.h
+        print gradI
+        u_ = np.sqrt(gradI/Wave.rho)
+        self.y = [Wave.vk*self.yp/u_,self.yp]
+
 
     def firstOrder(self,pot=False):
 
@@ -38,12 +75,8 @@ class Wave:
         else:
             self.eta = Wave.firsto
 
-        if Wave.pot == True:
-            w = (Wave.omega/Wave.k)
-            ch = np.cosh(self.k*(self.eta+self.h))
-            sh = np.sinh(self.k*self.h)
-            p = self.A*(ch/sh)*w
-            self.I = p*np.sin(Wave.O)
+        if pot == True:
+            self.FOpotential()
 
     def secondOrder(self,pot=False):
 
@@ -116,13 +149,54 @@ class Wave:
 
             self.eta = Wave.fiftho
 
-    def plotWave(self):
-        plt.plot(self.time,Wave.firsto.flatten()/self.k)
-        plt.plot(self.time,Wave.secondo.flatten()/self.k)
-        plt.plot(self.time,Wave.thirdo.flatten()/self.k)
-        plt.plot(self.time,Wave.fourtho.flatten()/self.k)
-        plt.plot(self.time,Wave.fiftho.flatten()/self.k)
-        plt.show()
+    def loadVOF(self,runfile):
+        import os
+
+        self.runfile = runfile
+        pathname = os.path.abspath('/home/aidan/OpenFOAM/aidan-2.3.0/current_runs/')
+        savePath = os.path.join(pathname+self.runfile,'gaugesVOF')
+        if not os.path.isdir(savePath):
+            os.makedirs(savePath)
+
+        postPath = os.path.join(pathname+self.runfile,'postProcessing')
+        if os.path.isdir(postPath):
+            postPath = 'postProcessing/sets/'
+        else:
+            postPath = 'sets/'
+
+        a = os.listdir(pathname+self.runfile+postPath)
+        a.sort(lambda a,b: cmp(float(a), float(b)))
+
+        dir1 = os.path.join(pathname+self.runfile,postPath,a[int(len(a)/2.0)])
+        b = os.listdir(dir1)
+        nSens = 0
+        index = []
+        for i in range(len(b)):
+            test1 = b[i].find('VOF') + 1
+            test2 = b[i].find('alpha') + 1
+            if test1 and test2:
+                index.append(i)
+                nSens += 1
+
+        self.gauges = np.zeros([len(index),len(a)])
+        self.simtime = a
+
+        if len(index) >= 10:
+            print '# of Gauges exceed 10, Check file naming'
+
+        for i,j in enumerate(a):
+            for k in index:
+
+                rfile = '/GaugeVOF0'+str(k+1)+'_alpha.water.xy'
+                ofile = np.loadtxt(pathname+self.runfile+postPath+str(j)+rfile)
+                argl = ofile[np.argwhere(ofile[:,3] <= 0.5),2].min()
+                argg = ofile[np.argwhere(ofile[:,3] >= 0.5),2].max()
+                vof = np.mean([argl,argg])
+                self.gauges[k,i] = vof
+
+
+
+
 
 
 
