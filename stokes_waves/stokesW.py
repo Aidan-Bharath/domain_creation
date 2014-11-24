@@ -158,16 +158,16 @@ class Wave:
         if not os.path.isdir(savePath):
             os.makedirs(savePath)
 
-        postPath = os.path.join(pathname+self.runfile,'postProcessing')
-        if os.path.isdir(postPath):
-            postPath = 'postProcessing/sets/'
+        postPath = os.path.join(pathname+self.runfile,'/postProcessing/')
+        if os.path.isdir(pathname+self.runfile+postPath):
+            postPath = pathname+self.runfile+'/postProcessing/sets/'
         else:
-            postPath = 'sets/'
+            postPath = pathname+self.runfile+'/sets/'
 
-        a = os.listdir(pathname+self.runfile+postPath)
+        a = os.listdir(postPath)
         a.sort(lambda a,b: cmp(float(a), float(b)))
 
-        dir1 = os.path.join(pathname+self.runfile,postPath,a[int(len(a)/2.0)])
+        dir1 = os.path.join(postPath,a[int(len(a)/2.0)])
         b = os.listdir(dir1)
         nSens = 0
         index = []
@@ -179,7 +179,6 @@ class Wave:
                 nSens += 1
 
         self.gauges = np.zeros([len(index),len(a)])
-        self.test = np.zeros([len(index),len(a)])
         self.simtime = [float(a[i]) for i in xrange(len(a))]
 
         if len(index) >= 10:
@@ -189,17 +188,45 @@ class Wave:
             for k in index:
 
                 rfile = '/GaugeVOF0'+str(k+1)+'_alpha.water.xy'
-                ofile = np.loadtxt(pathname+self.runfile+postPath+str(j)+rfile)
+                ofile = np.loadtxt(postPath+str(j)+rfile)
 
                 vof = ofile[0,2]
                 for s in range(len(ofile[:,2])-1):
                     vof = vof + ofile[s,3]*(ofile[s+1,2]-ofile[s,2])
                 self.gauges[k,i] = vof
 
+    def compPlot(self,series = None): #gearing this to take a list object
+        import matplotlib.pyplot as plt
+        from matplotlib import rc
+
+        if series == None:
+            series = [i for i in range(len(self.gauges[:,0]))]
+        else:
+            series = series
+
+        plt.figure()
+        rc('text',usetex=True)
+        rc('font',family='serif')
+
+        tg = self.simtime
+        tt = self.time
+
+        for i in range(len(series)):
+
+            plt.plot(tt,self.eta[i,:]+self.h)
+            plt.plot(tg,self.gauges[i,:])
+            plt.grid()
+            plt.xlabel(r'$ Time (s) $')
+            plt.ylabel(r'$ h + \eta (m) $')
+            plt.title('Probe Gauge Position '+str(self.x[i])+' m from Inlet')
+            plt.show()
 
 
-
-
+    def run(self,runfile = '/3D_tank'):
+        self.runfile=runfile
+        self.firstOrder()
+        self.loadVOF(self.runfile)
+        self.compPlot()
 
 
 
