@@ -197,16 +197,13 @@ class Wave:
 
     def compPlot(self,series = None): #gearing this to take a list object
         import matplotlib.pyplot as plt
-        from matplotlib import rc
 
         if series == None:
-            series = [i for i in range(len(self.gauges[:,0]))]
+            series = [i for i in range(len(self.eta[:,0]))]
         else:
             series = series
 
         plt.figure()
-        rc('text',usetex=True)
-        rc('font',family='serif')
 
         tg = self.simtime
         tt = self.time
@@ -216,8 +213,8 @@ class Wave:
             plt.plot(tt,self.eta[i,:]+self.h)
             plt.plot(tg,self.gauges[i,:])
             plt.grid()
-            plt.xlabel(r'$ Time (s) $')
-            plt.ylabel(r'$ h + \eta (m) $')
+            plt.xlabel(' Time (s) ')
+            plt.ylabel(' Water Depth (m) ')
             plt.title('Probe Gauge Position '+str(self.x[i])+' m from Inlet')
             plt.show()
 
