@@ -25,7 +25,8 @@ class Wave:
         self.yp = None
         self.y = None
         self.runfile = None
-        self.gauges = None
+        self.ofGauges = None
+        self.fGauges = None
         self.simtime = None
         self.time = np.linspace(0,time,time*60)
         self.x = np.array([x]).flatten()
@@ -149,7 +150,11 @@ class Wave:
 
             self.eta = Wave.fiftho
 
-    def loadVOF(self,runfile):
+    def integralWL(self,df):
+        l = df.shape[0]
+
+
+    def loadOFVOF(self,runfile):
         import os
 
         self.runfile = runfile
@@ -178,7 +183,7 @@ class Wave:
                 index.append(i)
                 nSens += 1
 
-        self.gauges = np.zeros([len(index),len(a)])
+        self.ofGauges = np.zeros([len(index),len(a)])
         self.simtime = [float(a[i]) for i in xrange(len(a))]
 
         if len(index) >= 10:
@@ -193,7 +198,39 @@ class Wave:
                 vof = ofile[0,2]
                 for s in range(len(ofile[:,2])-1):
                     vof = vof + ofile[s,3]*(ofile[s+1,2]-ofile[s,2])
-                self.gauges[k,i] = vof
+                self.ofGauges[k,i] = vof
+
+
+    def loadFluentVOF(self,runfile):
+        from glob import glob
+        import pandas as pd
+
+        self.runfile = glob(runfile)
+        files = [pd.read_csv(self.runfile,delim_whitespace=True,usecols=[1,3,8]) for self.runfile in self.runfile]
+        uni = files[0]['x-coordinate'].unique()
+        idx = []
+        for i in range(len(uni)):
+            a = np.argwhere(files[0]['x-coordinate'] == uni[i])
+            if a.shape[0] != 1:
+                idx.append(a.flatten())
+        files = pd.Panel(dict([(i*0.05,files[i]) for i in range(len(files)) ]))
+        flist = [files[:,idx[i],:] for i in range(len(idx))]
+
+        vof_list = []
+        for i in range(len(flist)):
+            a = flist[i]
+            self.test = flist[0]
+            s = a.shape[0]
+            for j in range(s):
+                j = 0.05*j
+                vof = a[j,0,2]
+                for k in range(a.shape[1]-1):
+                    vof = vof + a[j,k,2]*(a[j,k+1,1]-a[j,k,1])
+                    print vof
+                vof_list.append(vof)
+
+
+
 
     def compPlot(self,series = None): #gearing this to take a list object
         import matplotlib.pyplot as plt
