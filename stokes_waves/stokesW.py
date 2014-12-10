@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
+
 from __future__ import division
+import sys
 import numpy as np
 
 class Wave:
@@ -17,6 +19,8 @@ class Wave:
     fourtho = None
     fiftho = None
     potent = None
+    fluent = False
+    openfoam = False
 
     def __init__(self,lm,x,T,time,A,h=None):
 
@@ -27,7 +31,8 @@ class Wave:
         self.runfile = None
         self.ofGauges = None
         self.fGauges = None
-        self.simtime = None
+        self.ofsimtime = None
+        self.fsimtime = None
         self.time = np.linspace(0,time,time*60)
         self.x = np.array([x]).flatten()
         self.lm = lm
@@ -150,15 +155,13 @@ class Wave:
 
             self.eta = Wave.fiftho
 
-    def integralWL(self,df):
-        l = df.shape[0]
 
 
     def loadOFVOF(self,runfile):
         import os
 
         self.runfile = runfile
-        pathname = os.path.abspath('/home/aidan/OpenFOAM/aidan-2.3.0/current_runs/')
+        pathname = os.path.abspath('/home/aidan/OpenFOAM/aidan-2.3.0/complete/')
         savePath = os.path.join(pathname+self.runfile,'gaugesVOF')
         if not os.path.isdir(savePath):
             os.makedirs(savePath)
@@ -184,7 +187,7 @@ class Wave:
                 nSens += 1
 
         self.ofGauges = np.zeros([len(index),len(a)])
-        self.simtime = [float(a[i]) for i in xrange(len(a))]
+        self.ofsimtime = [float(a[i]) for i in xrange(len(a))]
 
         if len(index) >= 10:
             print '# of Gauges exceed 10, Check file naming'
@@ -195,60 +198,80 @@ class Wave:
                 rfile = '/GaugeVOF0'+str(k+1)+'_alpha.water.xy'
                 ofile = np.loadtxt(postPath+str(j)+rfile)
 
-                vof = ofile[0,2]
+                #vof = ofile[0,2]
+                vof = 0
                 for s in range(len(ofile[:,2])-1):
                     vof = vof + ofile[s,3]*(ofile[s+1,2]-ofile[s,2])
                 self.ofGauges[k,i] = vof
 
+        Wave.openfoam = True
 
     def loadFluentVOF(self,runfile):
         from glob import glob
         import pandas as pd
 
         self.runfile = glob(runfile)
-        files = [pd.read_csv(self.runfile,delim_whitespace=True,usecols=[1,3,8]) for self.runfile in self.runfile]
-        uni = files[0]['x-coordinate'].unique()
+        files = [pd.read_csv(self.runfile,delim_whitespace=True,usecols=[1,3,8]).as_matrix() for self.runfile in self.runfile]
+        uni = np.unique(files[0][:,0])
         idx = []
         for i in range(len(uni)):
-            a = np.argwhere(files[0]['x-coordinate'] == uni[i])
+            a = np.argwhere(files[0][:,0] == uni[i])
             if a.shape[0] != 1:
                 idx.append(a.flatten())
-        files = pd.Panel(dict([(i*0.05,files[i]) for i in range(len(files)) ]))
-        flist = [files[:,idx[i],:] for i in range(len(idx))]
+        files = np.dstack(files)
+        flist = [files[idx[i],:,:] for i in range(len(idx))]
 
-        vof_list = []
+        self.fGauges = np.zeros([len(flist),len(flist[0][0,0,:])])
+        self.fsimtime = np.linspace(-1,29,600)
+
         for i in range(len(flist)):
             a = flist[i]
-            self.test = flist[0]
-            s = a.shape[0]
-            for j in range(s):
-                j = 0.05*j
-                vof = a[j,0,2]
-                for k in range(a.shape[1]-1):
-                    vof = vof + a[j,k,2]*(a[j,k+1,1]-a[j,k,1])
-                    print vof
-                vof_list.append(vof)
+            for j in range(a.shape[2]):
+                vof = 0
+                for k in range(a.shape[0]-1):
+                    vof = vof + a[k,2,j]*(a[k+1,1,j]-a[k,1,j])
+                self.fGauges[i,j] = vof
 
-
+        Wave.fluent = True
 
 
     def compPlot(self,series = None): #gearing this to take a list object
         import matplotlib.pyplot as plt
 
         if series == None:
-            series = [i for i in range(len(self.eta[:,0]))]
+            try:
+                series = [i for i in range(len(self.eta[:,0]))]
+            except TypeError:
+                pass
+            try:
+                series = [i for i in range(len(self.ofGauges[:,0]))]
+            except TypeError:
+                pass
+            try:
+                series = [i for i in range(len(self.fGauges[:,0]))]
+            except TypeError:
+                pass
+
         else:
             series = series
 
         plt.figure()
 
-        tg = self.simtime
+        tof = self.ofsimtime
+        tf = self.fsimtime
         tt = self.time
 
         for i in range(len(series)):
 
-            plt.plot(tt,self.eta[i,:]+self.h)
-            plt.plot(tg,self.gauges[i,:])
+            if Wave.firsto != None:
+                plt.plot(tt,self.eta[i,:]+self.h)
+
+            if Wave.openfoam == True:
+                plt.plot(tof,self.ofGauges[i,:])
+
+            if Wave.openfoam == True:
+                plt.plot(tf,self.fGauges[i,:])
+
             plt.grid()
             plt.xlabel(' Time (s) ')
             plt.ylabel(' Water Depth (m) ')
