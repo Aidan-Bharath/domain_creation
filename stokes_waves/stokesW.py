@@ -264,14 +264,15 @@ class Wave:
         for i in range(len(series)):
 
             if Wave.firsto != None:
-                plt.plot(tt,self.eta[i,:]+self.h)
+                plt.plot(tt,self.eta[i,:]+self.h,label='Stokes First-Order')
 
             if Wave.openfoam == True:
-                plt.plot(tof,self.ofGauges[i,:])
+                plt.plot(tof,self.ofGauges[i,:],label='OpenFOAM Tank')
 
             if Wave.openfoam == True:
-                plt.plot(tf,self.fGauges[i,:])
+                plt.plot(tf,self.fGauges[i,:],label='Fluent Tank')
 
+            plt.legend()
             plt.grid()
             plt.xlabel(' Time (s) ')
             plt.ylabel(' Water Depth (m) ')
