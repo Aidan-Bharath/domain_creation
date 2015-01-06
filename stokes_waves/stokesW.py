@@ -211,26 +211,43 @@ class Wave:
         import pandas as pd
 
         self.runfile = glob(runfile)
-        files = [pd.read_csv(self.runfile,delim_whitespace=True,usecols=[1,3,8]).as_matrix() for self.runfile in self.runfile]
-        uni = np.unique(files[0][:,0])
-        idx = []
-        for i in range(len(uni)):
-            a = np.argwhere(files[0][:,0] == uni[i])
-            if a.shape[0] != 1:
-                idx.append(a.flatten())
-        files = np.dstack(files)
-        flist = [files[idx[i],:,:] for i in range(len(idx))]
+        try:
+            files = [pd.read_csv(self.runfile,delim_whitespace=True,usecols=[1,3,8]).as_matrix() for self.runfile in self.runfile]
+            uni = np.unique(files[0][:,0])
+            idx = []
+            for i in range(len(uni)):
+                a = np.argwhere(files[0][:,0] == uni[i])
+                if a.shape[0] != 1:
+                    idx.append(a.flatten())
+            files = np.dstack(files)
+            flist = [files[idx[i],:,:] for i in range(len(idx))]
+        except ValueError:
+            print 'not a combined file'
+            pass
+        files = glob(self.runfile+'/meshing1-*')
+        files = [pd.read_csv(fle,delim_whitespace=True).as_matrix() for fle in files]
 
-        self.fGauges = np.zeros([len(flist),len(flist[0][0,0,:])])
-        self.fsimtime = np.linspace(-1,29,600)
+        self.fsimtime = np.linspace(0,30,6000)
 
-        for i in range(len(flist)):
-            a = flist[i]
-            for j in range(a.shape[2]):
-                vof = 0
-                for k in range(a.shape[0]-1):
-                    vof = vof + a[k,2,j]*(a[k+1,1,j]-a[k,1,j])
-                self.fGauges[i,j] = vof
+        try:
+            self.fGauges = np.zeros([len(flist),len(flist[0][0,0,:])])
+            for i in range(len(flist)):
+                a = flist[i]
+                for j in range(a.shape[2]):
+                    vof = 0
+                    for k in range(a.shape[0]-1):
+                        vof = vof + a[k,2,j]*(a[k+1,1,j]-a[k,1,j])
+                    self.fGauges[i,j] = vof
+        except UnboundLocalError:
+            pass
+
+        self.fGauges = np.zeros([len(files)])
+        for i in xrange(len(files)):
+            vof = 0
+            for j in xrange(files[i].shape[0]-1):
+                vof = vof + files[i][j,4]*(files[i][j+1,3]-files[i][j,3])
+            self.fGauges[i] = vof
+
 
         Wave.fluent = True
 
@@ -241,15 +258,15 @@ class Wave:
         if series == None:
             try:
                 series = [i for i in range(len(self.eta[:,0]))]
-            except TypeError:
+            except (TypeError, IndexError):
                 pass
             try:
                 series = [i for i in range(len(self.ofGauges[:,0]))]
-            except TypeError:
+            except (TypeError,IndexError):
                 pass
             try:
                 series = [i for i in range(len(self.fGauges[:,0]))]
-            except TypeError:
+            except (TypeError,IndexError):
                 pass
 
         else:
@@ -269,8 +286,11 @@ class Wave:
             if Wave.openfoam == True:
                 plt.plot(tof,self.ofGauges[i,:],label='OpenFOAM Tank')
 
-            if Wave.openfoam == True:
-                plt.plot(tf,self.fGauges[i,:],label='Fluent Tank')
+            if Wave.fluent == True:
+                try:
+                    plt.plot(tf,self.fGauges[i,:],label='Fluent Tank')
+                except IndexError:
+                    plt.plot(tf,self.fGauges[:],label='Fluent Tank')
 
             plt.legend()
             plt.grid()
