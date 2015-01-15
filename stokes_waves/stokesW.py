@@ -161,7 +161,7 @@ class Wave:
         import os
 
         self.runfile = runfile
-        pathname = os.path.abspath('/home/aidan/OpenFOAM/aidan-2.3.0/complete/')
+        pathname = os.path.abspath('/media/aidan/Seagate Expansion Drive/openFoam/')
         savePath = os.path.join(pathname+self.runfile,'gaugesVOF')
         if not os.path.isdir(savePath):
             os.makedirs(savePath)
@@ -191,7 +191,6 @@ class Wave:
 
         if len(index) >= 10:
             print '# of Gauges exceed 10, Check file naming'
-
         for i,j in enumerate(a):
             for k in index:
 
@@ -200,8 +199,9 @@ class Wave:
 
                 #vof = ofile[0,2]
                 vof = 0
-                for s in range(len(ofile[:,2])-1):
-                    vof = vof + ofile[s,3]*(ofile[s+1,2]-ofile[s,2])
+                for s in range(len(ofile[:,1])-1):
+                    vof = vof + ofile[s,3]*(ofile[s+1,1]-ofile[s,1])
+                    #print vof
                 self.ofGauges[k,i] = vof
 
         Wave.openfoam = True
@@ -221,10 +221,10 @@ class Wave:
                     idx.append(a.flatten())
             files = np.dstack(files)
             flist = [files[idx[i],:,:] for i in range(len(idx))]
-        except ValueError:
+        except (ValueError,IndexError):
             print 'not a combined file'
             pass
-        files = glob(self.runfile+'/meshing1-*')
+        files = glob(self.runfile+'/meshing3-*')
         files = [pd.read_csv(fle,delim_whitespace=True).as_matrix() for fle in files]
 
         self.fsimtime = np.linspace(0,30,6000)
