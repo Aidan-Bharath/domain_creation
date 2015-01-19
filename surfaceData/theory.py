@@ -8,7 +8,13 @@ def omega(l):
     return (2*np.pi)/l[2]
 
 def O(l):
-    return k(l)*l[3][:,None]-omega(l)*l[4][None,:]
+        try:
+            O = k(l)*l[3][:,None]-omega(l)*l[4][None,:]
+        except AttributeError:
+            l[4] = l[4].values
+            O = k(l)*l[3][:,None]-omega(l)*l[4][None,:]
+        return O
+
 
 def S(l):
     return 1/np.cosh(2*k(l)*l[5])
@@ -49,11 +55,12 @@ def fifth(l):
 
 def theory(l):
     allTheory = np.zeros([l[3].shape[0],l[4].shape[0],5])
-    allTheory[:,:,0] = first(l)
-    allTheory[:,:,1] = first(l)+second(l)
-    allTheory[:,:,2] = first(l)+second(l)+third(l)
-    allTheory[:,:,3] = first(l)+second(l)+third(l)+fourth(l)
-    allTheory[:,:,4] = first(l)+second(l)+third(l)+fourth(l)+fifth(l)
+
+    allTheory[:,:,0] = first(l)+l[5]
+    allTheory[:,:,1] = first(l)+second(l)+l[5]
+    allTheory[:,:,2] = first(l)+second(l)+third(l)+l[5]
+    allTheory[:,:,3] = first(l)+second(l)+third(l)+fourth(l)+l[5]
+    allTheory[:,:,4] = first(l)+second(l)+third(l)+fourth(l)+fifth(l)+l[5]
 
     return allTheory
 
