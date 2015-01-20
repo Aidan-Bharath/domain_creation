@@ -8,12 +8,12 @@ def omega(l):
     return (2*np.pi)/l[2]
 
 def O(l):
-        try:
-            O = k(l)*l[3][:,None]-omega(l)*l[4][None,:]
-        except AttributeError:
-            l[4] = l[4].values
-            O = k(l)*l[3][:,None]-omega(l)*l[4][None,:]
-        return O
+    try:
+        O = k(l)*l[3][:,None]-omega(l)*l[4][None,:]
+    except AttributeError:
+        l[4] = l[4].values
+        O = k(l)*l[3][:,None]-omega(l)*l[4][None,:]
+    return O
 
 
 def S(l):
