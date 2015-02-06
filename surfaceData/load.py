@@ -1,27 +1,50 @@
 from os import path,chdir,walk
+import re
+import operator as op
 import glob
 import numpy as np
 import pandas as pd
+
+def numSort(files,paths):
+                
+    if paths == '5m':
+        cutLen = 6
+    else:
+        cutLen = 8
+
+    #lenFiles = len(files)
+    fileDict = {}
+    for i,j in enumerate(files):
+                    
+        tFile = re.sub('.csv','',j)
+        tFiles = re.sub('e','E',tFile)        
+                    
+        fileDict[i] = float(tFiles[cutLen:])
+    
+    testDict = sorted(fileDict.items(),key=op.itemgetter(1))
+    
+    files = [files[item[0]] for item in testDict]
+    times = [item[1] for item in testDict]
+    
+    return files,times
 
 def interpDF(df):
     # Meant to specifically work on StarCCM data
 
     height = np.zeros([len(df['Z (m)'])-1])
-
+    surface = 0
     for i in xrange(height.shape[0]):
         vof = df['Volume Fraction of Water'][i]
         h = df['Z (m)'][i+1]-df['Z (m)'][i]
-        height[i] = vof*h
+        surface = surface + vof*h
 
-    surface = height.sum()    
+    #surface = height.sum()    
     
     return surface
     
 
 def StarFindFiles(parDir):
     curDir = path.abspath('./')
-    
-    # Unfortunitely StarCCM doesnt interpolate data so we must do that.
 
     chdir(parDir)
     allConts = glob.glob('*')
@@ -30,19 +53,22 @@ def StarFindFiles(parDir):
     dataDirs = {}
     for paths,tf in zip(allConts,isDir):
         if tf == True:
-                dataPath = path.join(parDir,paths)
-                chdir(dataPath)
-
-                #Watch out here the sorting is not correct
-                files = sorted(glob.glob('*'))
-                dataFiles = [path.join(dataPath,fName) for fName in files]
-                sumArray = np.zeros([len(dataFiles)])                
+            print paths
+                
+            dataPath = path.join(parDir,paths)
+            chdir(dataPath)
             
-                for index,data in enumerate(dataFiles):
-                    sumArray[index] = interpDF(pd.read_csv(data))
+            # Ugh the Sorting
+            files,times = numSort(glob.glob('*'),paths)
                 
+            dataFiles = [path.join(dataPath,fName) for fName in files]
                 
-                dataDirs[paths] = pd.DataFrame(sumArray)
+            # Unfortunitely StarCCM doesnt interpolate data so we must do that.
+            sumArray = np.zeros([len(dataFiles)])                
+            for index,data in enumerate(dataFiles):
+                sumArray[index] = interpDF(pd.read_csv(data))
+                
+            dataDirs[paths] = pd.DataFrame(sumArray,index=times)
                
     chdir(curDir)
     
@@ -71,7 +97,7 @@ def OFFindFiles(parDir):
     chdir(curDir)
     return dataDirs,topPath
 
-def loadSurfFile(parDir,simType='OF'):
+def loadSurfFile(parDir,simType='OF',save=False):
 
     if simType == 'OF':
         fileLists,paths = OFFindFiles(parDir)
