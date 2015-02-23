@@ -68,7 +68,7 @@ def StarFindFiles(parDir):
             for index,data in enumerate(dataFiles):
                 sumArray[index] = interpDF(pd.read_csv(data))
                 
-            dataDirs[paths] = pd.DataFrame(sumArray,index=times)
+            dataDirs[paths] = pd.DataFrame(sumArray,index=times,columns=['vof'])
                
     chdir(curDir)
     
