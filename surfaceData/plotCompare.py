@@ -41,11 +41,11 @@ if __name__ == "__main__":
 
     import load,theory
     import interpolate as interp
-
-    Dir = '/media/aidan/Seagate Expansion Drive/openFoam/convDatFiles/'
-    x = np.array([10,20,30,35,40])
-    time = np.linspace(0,120,1000)
-    l = [8,0.05,3.0337,x,time,0.8]
+    
+    Dir = 'C://Users/ABHARATH/Documents/OpenFoam'
+    x = np.array([5,15,25])
+    time = np.linspace(0,100,1000)
+    l = [5,0.015,2.398,x,time,0.8]
 
     data = load.loadSurfFile(Dir)
     straightCompare(data,l,data,'gauge20',1,1)

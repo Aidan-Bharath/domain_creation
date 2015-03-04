@@ -110,6 +110,6 @@ def loadSurfFile(parDir,simType='OF',save=False):
 
 if __name__ == "__main__":
 
-    direct = 'C://Users/ABHARATH/Documents/StarCCM/waveTank_4040/'
-    files = loadSurfFile(direct,simType='StarCCM')
+    direct = 'C://Users/ABHARATH/Documents/OpenFoam'
+    files = loadSurfFile(direct,simType='OF')
 

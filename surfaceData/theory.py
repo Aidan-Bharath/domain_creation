@@ -68,12 +68,12 @@ def theory(l):
 
 if __name__ == "__main__":
 
-    lm = 1
-    A = 0.5
-    T = 2.2
+    lm = 5
+    A = 0.015
+    T = 2.389
     x = np.linspace(0,10,100)
-    time = np.linspace(0,20,50)
-    h = 2
+    time = np.linspace(0,10,500)
+    h = 0.5
     l = [lm,A,T,x,time,h]
 
-    print theory(l)
+    the = theory(l)
