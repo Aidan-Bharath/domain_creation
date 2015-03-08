@@ -40,7 +40,6 @@ def interpDF(df):
 
     return surface
     
-   
 
 def loadSurfMap(dateTime):
     
@@ -58,7 +57,6 @@ def StarFindFiles(parDir,par=8):
     chdir(parDir)
     allConts = glob.glob('*')
     isDir = [path.isdir(dirs) for dirs in allConts]
-    print allConts
     
     dataDirs = {}
     for paths,tf in zip(allConts,isDir):
@@ -73,7 +71,6 @@ def StarFindFiles(parDir,par=8):
             dataFiles = [path.join(dataPath,fName) for fName in files]
              
             try:
-
                 dataFiles = [(i,dataFiles[i]) for i in xrange(len(dataFiles))]
                 p = Pool(par)                
                 sumFrame = pd.DataFrame(p.map(ParintDF,dataFiles))[1]
@@ -89,7 +86,7 @@ def StarFindFiles(parDir,par=8):
             
                 for i in xrange(len(load)):
                     dataDirs[load[i][1]] = load[i][0]
-                
+    p.terminate()  
     chdir(curDir)
     
     return dataDirs
@@ -102,5 +99,5 @@ def ParintDF(df):
 
 if __name__ == "__main__":
     
-    parDir = 'C:\Users\ABHARATH\Documents\StarCCM\ConvStudy\conv2020nbr_r'
+    parDir = 'C:\Users\ABHARATH\Documents\StarCCM\ConvStudy\conv1010fbr'
     files = StarFindFiles(parDir)
