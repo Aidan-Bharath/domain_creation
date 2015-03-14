@@ -72,10 +72,13 @@ def StarFindFiles(parDir,par=8):
              
             try:
                 dataFiles = [(i,dataFiles[i]) for i in xrange(len(dataFiles))]
+                header = pd.read_csv(dataFiles[0][1],nrows=1).columns[:-3]
                 p = Pool(par)                
-                sumFrame = pd.DataFrame(p.map(ParintDF,dataFiles))[1]
+                sumFrame = p.map(ParintDF,dataFiles)
                 p.terminate()
-                sumFrame = sumFrame-sumFrame.mean()
+                data = [sumFrame[i][1] for i in xrange(len(sumFrame))]
+                sumFrame = pd.DataFrame(data,index=times,columns=header)
+                #sumFrame = sumFrame-sumFrame.mean()
                 dataDirs[paths] = sumFrame
             
             except (ValueError,KeyError):
@@ -94,10 +97,11 @@ def StarFindFiles(parDir,par=8):
 def ParintDF(df):
     
     cols = ['Volume Fraction of water','Z (m)']
-    yes = interpDF(pd.read_csv(df[1],usecols=cols))
+    #yes = interpDF(pd.read_csv(df[1],usecols=cols))
+    yes = pd.read_csv(df[1],nrows=1).values[:,:-3].flatten()    
     return [df[0],yes]
 
 if __name__ == "__main__":
     
-    parDir = 'C:\Users\ABHARATH\Documents\StarCCM\ConvStudy\conv1010fbr'
-    files = StarFindFiles(parDir)
+    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/newTankConvModels/RSM'
+    files2 = StarFindFiles(parDir)
