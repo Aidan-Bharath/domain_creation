@@ -47,10 +47,14 @@ def cutData(data):
     return data
     
 def dataDiff(data,i,j):
-    data = (((data.iloc[:,i]-data.iloc[:,j])**2).apply(np.sum)).apply(np.sqrt)
+    data = (((data[i]-data[j])**2).apply(np.sum)).apply(np.sqrt)
     return data
     
 def calcDiff(data):
+    import itertools as it
+    for col in it.combinations(data.columns,2):
+        data[str(i)+'-'+str(j)] = dataDiff(data,col[0],col[1])
+    
     frameLen = len(data.columns)
     for i in xrange(frameLen):
         if i != frameLen-1:
