@@ -15,3 +15,5 @@ def killProcTree(pid, including_parent=False):
     if including_parent:
         parent.kill()
 
+if __name__ == "__main__":
+    killProcTree(0)

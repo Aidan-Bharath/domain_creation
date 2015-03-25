@@ -1,5 +1,7 @@
 from __future__ import division
 import numpy as np
+import pandas as pd
+import theory
 import matplotlib.pyplot as plt
 
 def straightCompare(data,l,mesh='dat1',gauge='gauge10',position=0,sOrder=1):
@@ -36,65 +38,103 @@ def straightCompare(data,l,mesh='dat1',gauge='gauge10',position=0,sOrder=1):
         plt.title(gauge)
         plt.show()
 
-def starPlot(data1,data2,l):
-    import theory    
+def findTimes(data):
+    time = data['thin'].index.values.flatten()
+    return time
     
-    time1 = data1['thin']['Report: 15m (m)'].index.values.flatten()
-    time2 = data2['thin']['Report: 15m (m)'].index.values.flatten()
-    data1 = data1['thin']['Report: 15m (m)'].values.flatten()
-    data2 = data2['thin']['Report: 15m (m)'].values.flatten()
-    #time1 = data1['thin']['Report: 15m (m)'][5.000:15.000].index.values.flatten()
-    #time2 = data2['thin']['Report: 15m (m)'][5.000:15.000].index.values.flatten()
-    #data1 = data1['thin']['Report: 15m (m)'][5.000:15.000].values.flatten()
-    #data2 = data2['thin']['Report: 15m (m)'][5.000:15.000].values.flatten()
-    #rms = np.sqrt(np.sum((data1-data2)**2)/len(data1))
+def cutData(data):
+    data = data[0][data[1]][data[2]]
+    return data
     
-    recur = 1000
-    shift = np.linspace(0,2,recur)
+def dataDiff(data,i,j):
+    data = (((data.iloc[:,i]-data.iloc[:,j])**2).apply(np.sum)).apply(np.sqrt)
+    return data
+    
+def calcDiff(data):
+    frameLen = len(data.columns)
+    for i in xrange(frameLen):
+        if i != frameLen-1:
+            for j in xrange(frameLen-(i)):
+                j = j+i
+                if (j != frameLen and i != j):
+                    data[str(i)+'-'+str(j)] = dataDiff(data,i,j)
+                    
+    return data
+    
+def compTheory(data,position=0,order=1):
+    rms = []
+    recur = 500
+    shift = np.linspace(0,2*np.pi,recur)
+    time = data[0][0].index.values.flatten()
+    l = data[1][1]
+        
+    for i in xrange(recur):    
+    
+        l[4] = time-shift[i]
+        the = theory.theory(l)[position,:,order]
+        a = np.sqrt(np.sum((data[0][0]-the)**2)/len(data[0][0]))
+        rms.append(a)
+
+    rms = np.array(rms)
+    rms_shift = np.argwhere(rms == rms.min())
+    l[4] = (time-shift[rms_shift]).flatten()
       
-    trms1=[]
-    trms2=[]
-    for i in xrange(recur):
-        l[4] = time1+shift[i]
-        the = theory.theory(l)
-        trms1.append(np.sqrt(np.sum((data1-the[:,:,1])**2)/len(data1)))
-        l[4] = time2+shift[i]
-        the = theory.theory(l)
-        trms2.append(np.sqrt(np.sum((data2-the[:,:,1])**2)/len(data2)))
+    return theory.theory(l)[position,:,order]
+
+
+
+def starCalc(data,l,diff=True,thry=True):    
+    from multiprocessing import Pool
     
-    ts1 = np.argwhere(np.array(trms1) == np.array(trms1).min())
-    ts2 = np.argwhere(np.array(trms2) == np.array(trms2).min())
-    print l[2] - shift[ts1]
-    print l[2] - shift[ts2]    
+    cols = ['t1','t2','t3','t4']
+    probe = 'Report: 5m (m)'
+    name = 'thin'
     
-    l[4] = time1
+    p = Pool(8)
     
-    stokes = theory.theory(l)
-    #print rms
+    data = [(dat,name,probe) for dat in data]
+    data = p.map(cutData,data)
+    p.terminate()
+      
+    data = pd.concat(data,axis=1)
+    data.columns = cols
+
+    if thry == True:
+        compdata = [(data.iloc[:,i],l) for i in xrange(len(data.columns))]
+        data['theory'] = compTheory(compdata)    
+      
+    if diff == True:
+        data = calcDiff(data)
+        
+    return [data,probe,cols]
+   
+def starPlot(data,l,diff=True,thry=True):
+    data,probe,cols = data[0],data[1],data[2]
     
-    font = {'family':'normal','weight':'bold','size':20}
-    plt.rc('font',**font)
-    fig = plt.figure()
-    plt.plot(time1,data1,label='Laminar Model')
-    plt.plot(time2,data2,label='RSM Model')
-    #plt.plot(time1,stokes[:,:,1].flatten(),label='Stokes 2nd-Order')
-    plt.legend(loc=3)
-    plt.grid()
-    plt.title('Wave Elevation')
-    plt.xlabel('Time (s)')
-    plt.ylabel('Water Elevation (m)')
-    plt.show()
-    
+    if diff and thry == True:
+        cols.append('theory')
+        lcols = len(cols)
+        time = data.index.values 
+        
+        plt.subplot(211)
+        plt.plot(time,data.iloc[:,:lcols],label=cols)
+        plt.title('Waveheight '+str(probe))
+        plt.grid()
+        plt.legend()
+        plt.subplot(212)
+        plt.plot(time,data.iloc[:,lcols+1:])
+        plt.grid()        
+        plt.show()
+        
 
 if __name__ == "__main__":
 
-    import load,theory
-    import interpolate as interp
-    
     Dir = 'C://Users/ABHARATH/Documents/OpenFoam'
     x = np.array([5])
     time = np.linspace(0,100,1000)
-    l = [5,0.1,1.940,x,time,1]
-    starPlot(files1,files2,l)
+    l = [5,0.01,1.940,x,time,1]
+    data = starCalc([t1,t2,t3,t4],l)
+    starPlot(data,l)
+    
 
     

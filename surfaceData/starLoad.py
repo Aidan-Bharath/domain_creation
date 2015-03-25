@@ -103,5 +103,11 @@ def ParintDF(df):
 
 if __name__ == "__main__":
     
-    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/newTankConvModels/RSM'
-    files2 = StarFindFiles(parDir)
+    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/newTankConvModels/thinTank1'
+    t1 = StarFindFiles(parDir)
+    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/newTankConvModels/thin2tank'
+    t2 = StarFindFiles(parDir)
+    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/newTankConvModels/thintank3'
+    t3 = StarFindFiles(parDir)
+    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/newTankConvModels/thintank4z'
+    t4 = StarFindFiles(parDir)
