@@ -50,7 +50,7 @@ def loadSurfMap(dateTime):
     return [tmp,dateTime[1]]
         
 
-def StarFindFiles(parDir,par=8):
+def StarFindFiles(parDir,par=8,surfFile=False):
   
     curDir = path.abspath('./')
 
@@ -70,10 +70,10 @@ def StarFindFiles(parDir,par=8):
                 
             dataFiles = [path.join(dataPath,fName) for fName in files]
              
-            try:
+            if surfFile == False:
                 dataFiles = [(i,dataFiles[i]) for i in xrange(len(dataFiles))]
                 header = pd.read_csv(dataFiles[0][1],nrows=1).columns[:-3]
-                p = Pool(par)                
+                p = Pool(par)
                 sumFrame = p.map(ParintDF,dataFiles)
                 p.terminate()
                 data = [sumFrame[i][1] for i in xrange(len(sumFrame))]
@@ -81,7 +81,7 @@ def StarFindFiles(parDir,par=8):
                 #sumFrame = sumFrame-sumFrame.mean()
                 dataDirs[paths] = sumFrame
             
-            except (ValueError,KeyError):
+            else:
                 dateTime = [(i,j) for i,j in zip(files,times)]
                 p = Pool(par)                
                 load = p.map(loadSurfMap,dateTime)
@@ -103,11 +103,13 @@ def ParintDF(df):
 
 if __name__ == "__main__":
     
-    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/newTankConvModels/thinTank1'
-    t1 = StarFindFiles(parDir)
-    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/newTankConvModels/thin2tank'
-    t2 = StarFindFiles(parDir)
-    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/newTankConvModels/thintank3'
-    t3 = StarFindFiles(parDir)
-    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/newTankConvModels/thintank4z'
-    t4 = StarFindFiles(parDir)
+    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/diffraction/'
+    dif = StarFindFiles(parDir,surfFile=True)
+#    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/longTankConv/mesh30-20'    
+#    t2 = StarFindFiles(parDir)
+#    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/longTankConv/mesh30-30'
+#    t3 = StarFindFiles(parDir)
+#    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/longTankConv/mesh30-40'
+#    t4 = StarFindFiles(parDir)
+#    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/longTankConv/mesh30-50'
+#    t5 = StarFindFiles(parDir)

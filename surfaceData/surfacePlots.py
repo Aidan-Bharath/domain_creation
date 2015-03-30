@@ -8,6 +8,7 @@ Created on Tue Mar 03 14:03:39 2015
 import numpy as np
 from scipy.interpolate import griddata
 import matplotlib.pyplot as plt
+from matplotlib import cm
 
 
 def setGrid(df,npoint,interp):
@@ -17,14 +18,14 @@ def setGrid(df,npoint,interp):
     
     return xi,yi,zi
 
-def surfPlot(df,plotshow=True,plotsave=False,npoint=500,interp='linear'):
+def surfPlot(df,plotshow=True,plotsave=False,npoint=1000,interp='linear'):
     
     xi,yi,zi = setGrid(df,npoint,interp)
     
     plt.figure()
     
-    plt.contour(xi,yi,zi,25,linewidths=0.5,colors='k')
-    plt.contourf(xi,yi,zi,25,cmap=plt.cm.jet)
+    plt.contour(xi,yi,zi,15,linewidths=0.5,colors='k')
+    plt.contourf(xi,yi,zi,100,cmap=plt.cm.jet)
     plt.colorbar()
     plt.xlim(df['x'].min(),df['x'].max())
     plt.ylim(df['y'].min(),df['y'].max())
@@ -61,19 +62,15 @@ def dwt2Plot(data,degr=False,plotsave=False,npoint=500,interp='linear'):
        
     if degr is True:
         from mpl_toolkits.mplot3d import axes3d
-        
        
-        
         x = np.tile(grid[0][::2],(grid[0][::2].shape[0],1))        
         y = np.tile(grid[1][::2],(grid[1][::2].shape[0],1))        
         z = coef[0]+coef[1][0]+coef[1][1]+coef[1][2]            
         
-        
-  
-        
         fig = plt.figure()
         ax = fig.gca(projection='3d')
-        ax.plot_surface(x,y.T,z)
+        surf = ax.plot_surface(x,y.T,z,rstride=10,cstride=10,cmap=cm.coolwarm)
+        fig.colorbar(surf,shrink=0.5,aspect=5)
         
         plt.show()
     
@@ -157,5 +154,5 @@ def gridplotTest(numiter=1000):
         
 if __name__ == "__main__":
     
-    a = gridplotTest()    
-    #coef,grid = dwt2Plot(files[7.59],degr=True)
+    surfPlot(dif[7.95]) 
+    #coef,grid = dwt2Plot(dif[9.43],degr=True)

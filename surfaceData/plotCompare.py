@@ -47,22 +47,14 @@ def cutData(data):
     return data
     
 def dataDiff(data,i,j):
-    data = (((data[i]-data[j])**2).apply(np.sum)).apply(np.sqrt)
+    data = ((((data[i]-data[j])**2)/2).apply(np.sum)).apply(np.sqrt)
     return data
     
 def calcDiff(data):
     import itertools as it
     for col in it.combinations(data.columns,2):
-        data[str(i)+'-'+str(j)] = dataDiff(data,col[0],col[1])
+        data[str(col[0])+'-'+str(col[1])] = dataDiff(data,col[0],col[1])
     
-    frameLen = len(data.columns)
-    for i in xrange(frameLen):
-        if i != frameLen-1:
-            for j in xrange(frameLen-(i)):
-                j = j+i
-                if (j != frameLen and i != j):
-                    data[str(i)+'-'+str(j)] = dataDiff(data,i,j)
-                    
     return data
     
 def compTheory(data,position=0,order=1):
@@ -90,9 +82,9 @@ def compTheory(data,position=0,order=1):
 def starCalc(data,l,diff=True,thry=True):    
     from multiprocessing import Pool
     
-    cols = ['t1','t2','t3','t4']
-    probe = 'Report: 5m (m)'
-    name = 'thin'
+    cols = ['t1','t2','t3','t4','t5']
+    probe = 'Report: 10m (m)'
+    name = 'vof'
     
     p = Pool(8)
     
@@ -121,10 +113,10 @@ def starPlot(data,l,diff=True,thry=True):
         time = data.index.values 
         
         plt.subplot(211)
-        plt.plot(time,data.iloc[:,:lcols],label=cols)
+        plt.plot(time,data.iloc[:,:lcols])
         plt.title('Waveheight '+str(probe))
         plt.grid()
-        plt.legend()
+        plt.legend(cols)
         plt.subplot(212)
         plt.plot(time,data.iloc[:,lcols+1:])
         plt.grid()        
@@ -137,7 +129,7 @@ if __name__ == "__main__":
     x = np.array([5])
     time = np.linspace(0,100,1000)
     l = [5,0.01,1.940,x,time,1]
-    data = starCalc([t1,t2,t3,t4],l)
+    data = starCalc([t1,t2,t3,t4,t5],l)
     starPlot(data,l)
     
 
