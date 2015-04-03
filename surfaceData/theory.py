@@ -13,6 +13,8 @@ def O(l):
     except AttributeError:
         l[4] = l[4].values
         O = k(l)*l[3][:,None]-omega(l)*l[4][None,:]
+    except TypeError:
+        O = k(l)*l[3]-omega(l)*l[4][None,:]
     return O
 
 

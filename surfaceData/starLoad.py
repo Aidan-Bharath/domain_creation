@@ -93,6 +93,15 @@ def StarFindFiles(parDir,par=8,surfFile=False):
     chdir(curDir)
     
     return dataDirs
+    
+def loadPickle(parDir,datas):
+    curDir = path.abspath('./')
+    chdir(parDir)
+
+    dataDirs = {re.sub('.p','',data):pd.read_pickle(data) for data in datas}
+    
+    chdir(curDir)
+    return dataDirs
 
 def ParintDF(df):
     
@@ -103,13 +112,17 @@ def ParintDF(df):
 
 if __name__ == "__main__":
     
-    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/diffraction/'
-    dif = StarFindFiles(parDir,surfFile=True)
-#    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/longTankConv/mesh30-20'    
-#    t2 = StarFindFiles(parDir)
-#    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/longTankConv/mesh30-30'
-#    t3 = StarFindFiles(parDir)
-#    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/longTankConv/mesh30-40'
-#    t4 = StarFindFiles(parDir)
-#    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/longTankConv/mesh30-50'
-#    t5 = StarFindFiles(parDir)
+    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/tank50m2/mesh10-20'
+    mesh1 = StarFindFiles(parDir,surfFile=False)
+    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/tank50m2/mesh20-20'    
+    mesh2 = StarFindFiles(parDir,surfFile=False)
+    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/tank50m2/mesh40-05'
+    mesh3 = StarFindFiles(parDir,surfFile=False)
+    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/tank50m2/mesh40-10'
+    mesh4 = StarFindFiles(parDir,surfFile=False)
+    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/tank50m2/mesh40-20ittc'
+    mesh5 = StarFindFiles(parDir,surfFile=False)
+    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/tank50m2/mesh40-30'
+    mesh6 = StarFindFiles(parDir,surfFile=False)
+    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/tank50m2/mesh60-20'
+    mesh7 = StarFindFiles(parDir,surfFile=False)

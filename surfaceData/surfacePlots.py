@@ -24,7 +24,7 @@ def surfPlot(df,plotshow=True,plotsave=False,npoint=1000,interp='linear'):
     
     plt.figure()
     
-    plt.contour(xi,yi,zi,15,linewidths=0.5,colors='k')
+    #plt.contour(xi,yi,zi,15,linewidths=0.5,colors='k')
     plt.contourf(xi,yi,zi,100,cmap=plt.cm.jet)
     plt.colorbar()
     plt.xlim(df['x'].min(),df['x'].max())
@@ -154,5 +154,5 @@ def gridplotTest(numiter=1000):
         
 if __name__ == "__main__":
     
-    surfPlot(dif[7.95]) 
+    surfPlot(dif[9.56]) 
     #coef,grid = dwt2Plot(dif[9.43],degr=True)

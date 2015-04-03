@@ -82,9 +82,9 @@ def compTheory(data,position=0,order=1):
 def starCalc(data,l,diff=True,thry=True):    
     from multiprocessing import Pool
     
-    cols = ['t1','t2','t3','t4','t5']
-    probe = 'Report: 10m (m)'
-    name = 'vof'
+    cols = ['thin1','thick1']
+    probe = 'Report: 5m (m)'
+    name = 'thin'
     
     p = Pool(8)
     
@@ -129,7 +129,7 @@ if __name__ == "__main__":
     x = np.array([5])
     time = np.linspace(0,100,1000)
     l = [5,0.01,1.940,x,time,1]
-    data = starCalc([t1,t2,t3,t4,t5],l)
+    data = starCalc([thin1,thick1],l)
     starPlot(data,l)
     
 
