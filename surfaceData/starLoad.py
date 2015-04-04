@@ -94,9 +94,10 @@ def StarFindFiles(parDir,par=8,surfFile=False):
     
     return dataDirs
     
-def loadPickle(parDir,datas):
+def loadPickle(parDir):
     curDir = path.abspath('./')
     chdir(parDir)
+    datas = glob.glob('*')
 
     dataDirs = {re.sub('.p','',data):pd.read_pickle(data) for data in datas}
     
