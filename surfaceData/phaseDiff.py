@@ -45,6 +45,10 @@ def peakFind(data,l,pos,order=1,_even=False):
         except ValueError:
             print maxlen
             print '----- All of the peaks have not been found ------'
+            if iterr is 500:
+                _even = True
+                print 'max iterations reached. Check data length'
+                sets,phases,framePeaks = [],[],[]
     
     return [sets,phases,framePeaks]
      
@@ -70,15 +74,12 @@ def phaseError(data,peaks,l):
     
     return [peakDiff,peakDiffsd]
     
-   
-        
-
-
 
 if __name__ == "__main__":
 
-    Dir = 'C:/Users/Aidan/Documents/StarData/waveheights/'
-    dic = sl.loadPickle(Dir)    
+    Dir = 'E:/StarCCM/ampIncrease/'
+    files = ['4cm30-40.p','8cm30-40.p','16cm30-40.p','32cm30-40_fo.p','32cm30-40_fifo.p']
+    dic = sl.loadPickle(Dir,files=files)    
     x = []
     time = []
     l = [5,0.01,1.940,x,time,1]

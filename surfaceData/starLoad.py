@@ -94,12 +94,14 @@ def StarFindFiles(parDir,par=8,surfFile=False):
     
     return dataDirs
     
-def loadPickle(parDir):
+def loadPickle(parDir,files=[]):
     curDir = path.abspath('./')
     chdir(parDir)
-    datas = glob.glob('*')
-
-    dataDirs = {re.sub('.p','',data):pd.read_pickle(data) for data in datas}
+    if not files:
+        datas = glob.glob('*')
+        dataDirs = {re.sub('.p','',data):pd.read_pickle(data) for data in datas}
+    else:
+        dataDirs = {re.sub('.p','',data):pd.read_pickle(data) for data in files}
     
     chdir(curDir)
     return dataDirs
@@ -113,17 +115,27 @@ def ParintDF(df):
 
 if __name__ == "__main__":
     
-    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/tank50m2/mesh10-20'
-    mesh1 = StarFindFiles(parDir,surfFile=False)
-    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/tank50m2/mesh20-20'    
-    mesh2 = StarFindFiles(parDir,surfFile=False)
-    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/tank50m2/mesh40-05'
-    mesh3 = StarFindFiles(parDir,surfFile=False)
-    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/tank50m2/mesh40-10'
-    mesh4 = StarFindFiles(parDir,surfFile=False)
-    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/tank50m2/mesh40-20ittc'
-    mesh5 = StarFindFiles(parDir,surfFile=False)
-    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/tank50m2/mesh40-30'
-    mesh6 = StarFindFiles(parDir,surfFile=False)
-    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/tank50m2/mesh60-20'
-    mesh7 = StarFindFiles(parDir,surfFile=False)
+#    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/tank50m2/mesh10-20'
+#    mesh1 = StarFindFiles(parDir,surfFile=False)
+#    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/tank50m2/mesh20-20'
+#    mesh2 = StarFindFiles(parDir,surfFile=False)
+#    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/tank50m2/mesh40-05'
+#    mesh3 = StarFindFiles(parDir,surfFile=False)
+#    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/tank50m2/mesh40-10'
+#    mesh4 = StarFindFiles(parDir,surfFile=False)
+#    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/tank50m2/mesh40-20ittc'
+#    mesh5 = StarFindFiles(parDir,surfFile=False)
+#    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/tank50m2/mesh40-30'
+#    mesh6 = StarFindFiles(parDir,surfFile=False)
+#    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/tank50m2/mesh40-50'
+#    mesh7 = StarFindFiles(parDir,surfFile=False)
+#    parDir = 'C:/Users/ABHARATH/Documents/StarCCM/tank50m2/mesh60-20'
+#    mesh8 = StarFindFiles(parDir,surfFile=False)
+    parDir = 'E:/StarCCM/tank50m3/mesh40-30'
+    mesh9 = StarFindFiles(parDir,surfFile=False)
+    #parDir = 'E:/StarCCM/tank50m3/mesh40-50'
+    #mesh10 = StarFindFiles(parDir,surfFile=False)
+    parDir = 'E:/StarCCM/tank50m3/mesh60-20'
+    mesh11 = StarFindFiles(parDir,surfFile=False)
+    parDir = 'E:/StarCCM/tank50m3/mesh70-20'
+    mesh12 = StarFindFiles(parDir,surfFile=False)
