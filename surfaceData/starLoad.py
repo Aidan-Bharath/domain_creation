@@ -101,7 +101,8 @@ def loadPickle(parDir,files=[]):
         datas = glob.glob('*')
         dataDirs = {re.sub('.p','',data):pd.read_pickle(data) for data in datas}
     else:
-        dataDirs = {re.sub('.p','',data):pd.read_pickle(data) for data in files}
+        for data in files:
+            dataDirs = {re.sub('.p','',data):pd.read_pickle(data) for data in files}
     
     chdir(curDir)
     return dataDirs

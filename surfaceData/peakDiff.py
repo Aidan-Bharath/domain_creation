@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import scipy.integrate as I
 import starLoad as sl
+import auxFunc as aux
 
 def waveHeightInt(data,peak,l,theoryInt=True):
     waveFiles = {}    
@@ -34,30 +35,47 @@ def waveHeightInt(data,peak,l,theoryInt=True):
 #        theory = np.sum(I.cumtrapz(x,func))
 #        print theory
     
-    return 'yes'#pd.DataFrame(waveFiles)
+    return 'yes'
 
 def squareDiff(Dir,target):
 
-    data = []
-    for i in target:    
-      
-        data.append([j for j in i]
+    data = [sl.loadPickle(Dir,i) for i in target] 
+    sdiff = {}    
+    for comb in zip(files1,files2):
+        name1,name2 = aux.rmP(comb[0]),aux.rmP(comb[1])
+        rms = np.sum((data[0][name1]-data[1][name2])**2/len(data[0][name1]))
+        sdiff[name1+'-'+name2] = np.sqrt(rms)
+    
+    return pd.DataFrame(sdiff)
+    
+def amplitudes(Dir,target,peaks,plot=True,leg=True):
+    data = [sl.loadPickle(Dir,i) for i in target]
+    
+    peakAmp = {}
+    for i,j in peaks[2].iteritems():
+        peak = data[0][i].loc[j,peaks[0]]
+        peakAmp[i] = peak
+    
+    if plot:
+        aux.dicSeriesPlot(peakAmp,leg=leg)
+    
+    return peakAmp
         
-    print data
-
-
-
-
 
 if __name__ == "__main__":
     
-    Dir = 'E:/StarCCM/ampIncrease/'
-    files1 = ['4cm30-20.p','8cm30-20.p','16cm30-20.p','32cm30-20_fo.p','32cm30-20_fifo.p']
-    files2 = ['4cm30-40.p','8cm30-40.p','16cm30-40.p','32cm30-40_fo.p','32cm30-40_fifo.p']
-        
+    Dir = '/media/aidan/Seagate Expansion Drive/starCCM/thickTank/pFiles/'
+    #files1 = ['2mesh10-20.p','2mesh20-20.p','2mesh40-20ittc.p','2mesh60-20.p']
+    #files2 = ['3mesh10-20.p','3mesh20-20.p','3mesh40-20ittc.p','3mesh60-20.p']
+    files1 = ['mesh40-20ittc5x.p']    
+    files2 = ['mesh40-20ittc10x.p']
     x = []
     time = []
     l = [5,0.01,1.940,x,time,1]
-    squareDiff(Dir,[files1,files2])
-    #pot = waveHeightInt(dic,peaks,l)
-    #pot.plot()
+    data =  squareDiff(Dir,[files1,files2])
+    #amp1 = amplitudes(Dir,[files2],peaks1,leg=False)
+    #amp2 = amplitudes(Dir,[files2],peaks2,leg=False)
+        
+    
+    
+    

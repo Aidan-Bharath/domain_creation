@@ -45,9 +45,9 @@ def peakFind(data,l,pos,order=1,_even=False):
         except ValueError:
             print maxlen
             print '----- All of the peaks have not been found ------'
-            if iterr is 500:
+            if iterr is 200:
                 _even = True
-                print 'max iterations reached. Check data length'
+                print ' ------ max iterations reached. Check data length ------'
                 sets,phases,framePeaks = [],[],[]
     
     return [sets,phases,framePeaks]
@@ -77,13 +77,15 @@ def phaseError(data,peaks,l):
 
 if __name__ == "__main__":
 
-    Dir = 'E:/StarCCM/ampIncrease/'
-    files = ['4cm30-40.p','8cm30-40.p','16cm30-40.p','32cm30-40_fo.p','32cm30-40_fifo.p']
-    dic = sl.loadPickle(Dir,files=files)    
+    Dir = '/media/aidan/Seagate Expansion Drive/starCCM/thickTank/pFiles'
+    files1 = ['75m.p','100m.p','125m.p']    
+    ttank = sl.loadPickle(Dir)#,files=files1)
     x = []
     time = []
     l = [5,0.01,1.940,x,time,1]
-    peaks = peakFind(dic,l,5)
-    pE = phaseError(dic,peaks,l)
+    del ttank['mesh40-20ittc20x']
+    ttank = aux.dicDFSlice(ttank,20.000)
+    peakstt = peakFind(ttank,l,5)
+   
     
         
