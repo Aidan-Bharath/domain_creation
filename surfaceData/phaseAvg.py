@@ -58,10 +58,26 @@ def surfacePhase(File,start,wl,d,nphases,wallDist):
     for i in xrange(len(ranges)):
         phased[i] = {key:data for key,data in data.iteritems() if key <= ranges[i][1] and key >= ranges[i][0]}    
     
-    #for i in sorted(phased[1].keys()):
-    #    print i
+    pAvg = np.zeros(phased.values()[0].values()[0].values()[0].shape)
+  
     
-    #print phased[:]
+    for times in xrange(len(phased.values()[0].keys())):
+        build = np.zeros(phased.values()[0].values()[0].values()[0].shape)
+     
+        for keys,data in phased.iteritems():
+            build = np.dstack((build,data[sorted(data.keys())[times]].values()[0]))
+               
+  
+        build = np.mean(np.delete(build,[0,0,0],axis=2),axis=2)
+        pAvg = np.dstack((pAvg,build))
+    pAvg = np.delete(pAvg,[0,0,0],axis=2)
+            
+            #loop through all keys
+            #for grids in data[sorted(data.keys())[times]].keys():
+        
+            
+    
+    print pAvg.shape
     
     
     
