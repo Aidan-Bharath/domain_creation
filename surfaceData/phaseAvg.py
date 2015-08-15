@@ -39,19 +39,19 @@ def reflectCalc(Dict,wl,d,wallDist,start,T):
     maxDist = inlet - 2*cp
     stop = (inlet + 2*refl-maxDist)/cp
     stop = start+T*np.floor((stop-start)/T)
-
+    
     ### temporary due to files    
-    stop = 10
+    
 
     return maxDist,stop
         
 
-def surfacePhase(File,start,wl,d,nphases,wallDist):
+def surfacePhase(File,start,wl,d,wallDist):
     T = aux.T(wl,d)    
     data = pd.read_pickle(File)
     
     mag,stop = reflectCalc(data,wl,d,wallDist,start,T) 
-    
+    print stop
     numT = int(np.floor((stop-start)/T))
     ranges = [[start+T*(i),start+T*(i+1)] for i in xrange(numT)]
     phased = {}
@@ -59,38 +59,51 @@ def surfacePhase(File,start,wl,d,nphases,wallDist):
         phased[i] = {key:data for key,data in data.iteritems() if key <= ranges[i][1] and key >= ranges[i][0]}    
     
     pAvg = np.zeros(phased.values()[0].values()[0].values()[0].shape)
-  
     
+      
     for times in xrange(len(phased.values()[0].keys())):
         build = np.zeros(phased.values()[0].values()[0].values()[0].shape)
-     
-        for keys,data in phased.iteritems():
-            build = np.dstack((build,data[sorted(data.keys())[times]].values()[0]))
-               
-  
-        build = np.mean(np.delete(build,[0,0,0],axis=2),axis=2)
-        pAvg = np.dstack((pAvg,build))
-    pAvg = np.delete(pAvg,[0,0,0],axis=2)
-            
-            #loop through all keys
-            #for grids in data[sorted(data.keys())[times]].keys():
         
-            
+        for keys,data in phased.iteritems():
+            try:
+                build = np.dstack((build,data[sorted(data.keys())[times]].values()[0]))
+            except IndexError:
+                pass
+     
+        build = np.mean(np.delete(build,[0,0,0],axis=2),axis=2)
+        
+        pAvg = np.dstack((pAvg,build))
+   
+    pAvg = np.delete(pAvg,[0,0,0],axis=2)
+    pAmp = (pAvg.max(axis=2)-pAvg.min(axis=2))/2
+    print pAmp.shape
     
-    print pAvg.shape
-    
-    
-    
-    
-    return phased
+    return [pAvg,pAmp,mag]
 
-
+def surfPhase(data,x,y,wl,A,h):
+    ### Test Set up
+    x = np.linspace(0,39,100)
+    #y = np.linspace(0,39,100)
+    #x,y = np.meshgrid(x,y)
+    k = aux.K(wl)
+    T = aux.T(wl,h)
+    t = np.linspace(0,T,100)    
+    wave = A*np.sin(k*x+(2*np.pi/T)*t)
+    print wave
+    
+    
+    
+    
+    return wave
+    
+    
+    
 if __name__ == "__main__":
     
-    Dir = '/home/aidan/starCCM/data/openInviscid/'
+    Dir = '/home/aidan/starCCM/data/inviscid/'
     File = 'surfData.p'
     
     #data = seriesPhase(Dir+File,3,4,0.5,5)
-    data = surfacePhase(Dir+File,3,4,0.5,3,[19,19])
-    
+    data = surfacePhase(Dir+File,10,4,0.5,[19,19])
+    #wave = surfPhase(2,1,1,4,0.01,0.5)
     
